@@ -1,0 +1,34 @@
+{
+  "name": "adampatterson/http",
+  "description": "",
+  "keywords": [
+    "http",
+    "guzzle"
+  ],
+  "license": "MIT",
+  "type": "library",
+  "authors": [
+    {
+      "name": "Adam Patterson",
+      "email": "hello@adampatterson.ca"
+    }
+  ],
+  "support": {
+    "issues": "https://github.com/adampatterson/Http/issues",
+    "source": "https://github.com/adampatterson/Http"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^9.5"
+  },
+  "require": {
+    "guzzlehttp/guzzle": "7.4.x-dev"
+  },
+  "autoload": {
+    "psr-4": {
+      "Http\\": "src/"
+    }
+  },
+  "scripts": {
+    "test": "phpunit"
+  }
+}
