@@ -21,7 +21,7 @@
     "phpunit/phpunit": "^9.5"
   },
   "require": {
-    "guzzlehttp/guzzle": "7.4.x-dev"
+    "guzzlehttp/guzzle": "dev-master,"
   },
   "autoload": {
     "psr-4": {
