@@ -44,6 +44,21 @@ class MakeHttpRequest
         return new self(...$args);
     }
 
+        function asJson()
+    {
+        return $this->bodyFormat('json')->contentType('application/json');
+    }
+
+    function asFormParams()
+    {
+        return $this->bodyFormat('form_params')->contentType('application/x-www-form-urlencoded');
+    }
+
+    function asMultipart()
+    {
+        return $this->bodyFormat('multipart');
+    }
+    
     /**
      * @param $token
      * @param  string  $type
