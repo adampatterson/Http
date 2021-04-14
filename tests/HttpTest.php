@@ -1,6 +1,6 @@
 <?php
 
-use Numeral\Http;
+use Http\Http;
 use PHPUnit\Framework\TestCase;
 
 class HttpTest extends TestCase
