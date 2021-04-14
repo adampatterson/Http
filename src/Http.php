@@ -10,9 +10,6 @@ use GuzzleHttp\Client;
  * @author Adam Patterson <http://github.com/adampatterson>
  * @link  https://github.com/adampatterson/Http
  */
-// https://github.com/kitetail/zttp/blob/master/src/Zttp.php
-// https://github.com/kitetail/zttp/blob/master/tests/ZttpTest.php
-// https://medium.com/@taylorotwell/tap-tap-tap-1fc6fc1f93a6
 class Http
 {
 
@@ -25,29 +22,19 @@ class Http
 class MakeHttpRequest
 {
 
-    protected $json;
-
-    private $bodyFormat;
-    private $options;
-    private $cookies;
-    private $beforeSendingCallbacks;
+    private $bodyFormat = 'json';
+    private $options = [];
+    private $response;
 
     private function __construct()
     {
-        $this->beforeSendingCallbacks = collect(function ($request, $options) {
-            $this->cookies = $options['cookies'];
-        });
-
-        $this->bodyFormat = 'json';
-        $this->options    = [
+        $this->options = [
             'headers'     => [],
             'http_errors' => false,
         ];
     }
 
     /**
-     * Returns a static self instance
-     *
      * @param  mixed  ...$args
      *
      * @return HttpRequest
@@ -57,6 +44,28 @@ class MakeHttpRequest
         return new self(...$args);
     }
 
+        function asJson()
+    {
+        return $this->bodyFormat('json')->contentType('application/json');
+    }
+
+    function asFormParams()
+    {
+        return $this->bodyFormat('form_params')->contentType('application/x-www-form-urlencoded');
+    }
+
+    function asMultipart()
+    {
+        return $this->bodyFormat('multipart');
+    }
+    
+    function bodyFormat($format)
+    {
+        return tap($this, function ($request) use ($format) {
+            $this->bodyFormat = $format;
+        });
+    }
+    
     /**
      * @param $token
      * @param  string  $type
@@ -65,75 +74,9 @@ class MakeHttpRequest
      */
     public function withToken($token, $type = 'Bearer')
     {
-        $this->withHeaders(['Authorization' => trim($type.' '.$token)]);
+        $this->options['headers']['Authorization'] = trim($type.' '.$token);
 
         return $this;
-    }
-
-    /**
-     * @param $contentType
-     *
-     * @return mixed
-     */
-    function contentType($contentType)
-    {
-        return $this->withHeaders(['Content-Type' => $contentType]);
-    }
-
-    /**
-     * @param $header
-     *
-     * @return mixed
-     */
-    function accept($header)
-    {
-        return $this->withHeaders(['Accept' => $header]);
-    }
-
-    /**
-     * @param $headers
-     *
-     * @return mixed
-     */
-    function withHeaders($headers)
-    {
-        return tap($this, function ($request) use ($headers) {
-            return $this->options = array_merge_recursive($this->options, [
-                'headers' => $headers,
-            ]);
-        });
-    }
-
-    /**
-     * @param $username
-     * @param $password
-     *
-     * @return mixed
-     */
-    function withBasicAuth($username, $password)
-    {
-        return tap($this, function ($request) use ($username, $password) {
-            return $this->options = array_merge_recursive($this->options, [
-                'auth' => [
-                    $username,
-                    $password
-                ],
-            ]);
-        });
-    }
-
-    /**
-     * @param $cookies
-     *
-     * @return mixed
-     */
-    function withCookies($cookies)
-    {
-        return tap($this, function ($request) use ($cookies) {
-            return $this->options = array_merge_recursive($this->options, [
-                'cookies' => $cookies,
-            ]);
-        });
     }
 
     /**
@@ -206,81 +149,50 @@ class MakeHttpRequest
         ]);
     }
 
-
     /**
+     * Send the request to the given URL.
+     *
      * @param  string  $method
      * @param  string  $url
      * @param  array  $options
      *
-     * @return mixed
-     * @throws HandleRequestException
-     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @return \Illuminate\Http\Client\Response
+     *
+     * @throws \Exception
      */
     public function send(string $method, string $url, array $options = [])
     {
         try {
-            return tap(new HttpResponse($this->client()->request($method, $url, $this->mergeOptions([
-                'query'    => $this->parseQueryParams($url),
-                'on_stats' => function ($transferStats) {
-                    $this->transferStats = $transferStats;
-                }
-            ], $options))), function ($response) {
-                $response->cookies       = $this->cookies;
-                $response->transferStats = $this->transferStats;
-            });
+            $this->response = $this->client()->request($method, $url, [
+                'headers' => $this->options['headers']
+            ]);
 
+            return $this;
         } catch (\GuzzleHttp\Exception\ConnectException $e) {
             throw new HandleRequestException($e->getMessage(), 0, $e);
         }
     }
 
     /**
-     * https://docs.guzzlephp.org/en/stable/handlers-and-middleware.html
-     *
      * @return Client
      */
     public function client()
     {
-        return new \GuzzleHttp\Client([
-            'cookies' => true
-        ]);
+        return new \GuzzleHttp\Client();
     }
 
     /**
-     * @param  mixed  ...$options
-     *
-     * @return array
-     */
-    public function mergeOptions(...$options)
-    {
-        return array_merge_recursive($this->options, ...$options);
-    }
-
-    /**
-     * @param $url
-     *
      * @return mixed
      */
-    public function parseQueryParams($url)
+    function status()
     {
-        return tap([], function (&$query) use ($url) {
-            parse_str(parse_url($url, PHP_URL_QUERY), $query);
-        });
-    }
-}
-
-class HttpResponse
-{
-
-    public function __construct($response)
-    {
-        $this->response = $response;
+        return $this->response->getStatusCode();
     }
 
     /**
      * @return string
      */
-    public function body()
+    function body()
     {
         return (string) $this->response->getBody();
     }
@@ -290,90 +202,8 @@ class HttpResponse
      */
     public function json()
     {
-        if ( ! isset($this->json)) {
-            $this->json = (array) json_decode($this->response->getBody(), true);
-        }
-
-        return $this->json;
-    }
-
-    public function header($header)
-    {
-        return $this->response->getHeaderLine($header);
-    }
-
-    public function headers()
-    {
-        return collect($this->response->getHeaders())->mapWithKeys(function ($values, $header) {
-            return [$header => $values[0]];
-        })->all();
-    }
-
-    public function status()
-    {
-        return $this->response->getStatusCode();
-    }
-
-    public function effectiveUri()
-    {
-        return $this->transferStats->getEffectiveUri();
-    }
-
-    public function isSuccess()
-    {
-        return $this->status() >= 200 && $this->status() < 300;
-    }
-
-    public function isOk()
-    {
-        return $this->isSuccess();
-    }
-
-    public function isRedirect()
-    {
-        return $this->status() >= 300 && $this->status() < 400;
-    }
-
-    public function isClientError()
-    {
-        return $this->status() >= 400 && $this->status() < 500;
-    }
-
-    public function isServerError()
-    {
-        return $this->status() >= 500;
-    }
-
-    public function cookies()
-    {
-        return $this->cookies;
-    }
-}
-
-class HttpRequest
-{
-
-    function __construct($request)
-    {
-        $this->request = $request;
-    }
-
-    function url()
-    {
-        return (string) $this->request->getUri();
-    }
-
-    function method()
-    {
-        return $this->request->getMethod();
+        return json_decode($this->response->getBody()->getContents());
     }
 }
 
 class HandleRequestException extends \Exception { }
-
-// https://medium.com/@taylorotwell/tap-tap-tap-1fc6fc1f93a6
-function tap($value, $callback)
-{
-    $callback($value);
-    return $value;
-}
