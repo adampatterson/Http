@@ -58,14 +58,14 @@ class MakeHttpRequest
     {
         return $this->bodyFormat('multipart');
     }
-    
+
     function bodyFormat($format)
     {
         return tap($this, function ($request) use ($format) {
             $this->bodyFormat = $format;
         });
     }
-    
+
     /**
      * @param $token
      * @param  string  $type
