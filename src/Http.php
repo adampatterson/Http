@@ -183,6 +183,18 @@ class MakeHttpRequest
         }
     }
 
+    function mergeOptions(...$options)
+    {
+        return array_merge_recursive($this->options, ...$options);
+    }
+
+    function parseQueryParams($url)
+    {
+        return tap([], function (&$query) use ($url) {
+            parse_str(parse_url($url, PHP_URL_QUERY), $query);
+        });
+    }
+
     /**
      * @return Client
      */
@@ -303,3 +315,9 @@ class HttpResponse
 }
 
 class HandleRequestException extends \Exception { }
+
+function tap($value, $callback)
+{
+    $callback($value);
+    return $value;
+}
