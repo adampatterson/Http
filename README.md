@@ -1,7 +1,12 @@
 # HTTP PHP
 ![PHP Composer](https://github.com/adampatterson/Http/workflows/PHP%20Composer/badge.svg?branch=main)
 
-A little wrapper around Guzzle 
+Started off as a little wrapper around Guzzle, now is a clone of ZTTP.
+
+**Changes:**
+* withToken
+* Removed Macroable
+* Uses `"guzzlehttp/guzzle": "7.4.x-dev"` 
 
 This script is still under development.
 
