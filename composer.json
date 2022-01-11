@@ -22,7 +22,7 @@
   },
   "require": {
     "guzzlehttp/guzzle": "^7.4",
-    "tightenco/collect": "dev-laravel-8-ongoing"
+    "tightenco/collect": "^8.34"
   },
   "autoload": {
     "psr-4": {
