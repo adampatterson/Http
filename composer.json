@@ -21,8 +21,8 @@
     "phpunit/phpunit": "^9.5"
   },
   "require": {
-    "guzzlehttp/guzzle": "7.4.x-dev",
-    "tightenco/collect": "dev-laravel-8-ongoing"
+    "guzzlehttp/guzzle": "^7.4",
+    "tightenco/collect": "^8.34"
   },
   "autoload": {
     "psr-4": {

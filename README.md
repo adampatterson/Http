@@ -6,7 +6,7 @@ Started off as a little wrapper around Guzzle, now is a clone of ZTTP.
 **Changes:**
 * withToken
 * Removed Macroable
-* Uses `"guzzlehttp/guzzle": "7.4.x-dev"` 
+* Uses `"guzzlehttp/guzzle": "7.4.x"` 
 
 This script is still under development.
 
@@ -25,4 +25,4 @@ $ which phpunit
 
 ## Local Dev
 
-`ln -s ~/Sites/personal/_packages/Http/ ~/Sites/personal/_WordPressPlugins/algolia-acf/vendor/adampatterson/http`
+`ln -s ~/Sites/personal/_packages/Http/ ~/Sites/personal/projectName/vendor/adampatterson/http`
