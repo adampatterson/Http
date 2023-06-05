@@ -12,7 +12,6 @@ use GuzzleHttp\Client;
  */
 class Http
 {
-
     public static function __callStatic($method, $args)
     {
         return MakeHttpRequest::new()->{$method}(...$args);
@@ -43,7 +42,7 @@ class MakeHttpRequest
     /**
      * @param  mixed  ...$args
      *
-     * @return HttpRequest
+     * @return MakeHttpRequest
      */
     static function new(...$args)
     {
@@ -72,6 +71,11 @@ class MakeHttpRequest
         });
     }
 
+    function contentType($contentType)
+    {
+        return $this->withHeaders(['Content-Type' => $contentType]);
+    }
+
     /**
      * @param $token
      * @param  string  $type
@@ -83,6 +87,15 @@ class MakeHttpRequest
         $this->options['headers']['Authorization'] = trim($type.' '.$token);
 
         return $this;
+    }
+
+    function withHeaders($headers)
+    {
+        return tap($this, function ($request) use ($headers) {
+            return $this->options = array_merge_recursive($this->options, [
+                'headers' => $headers,
+            ]);
+        });
     }
 
     /**
