@@ -6,6 +6,9 @@ use GuzzleHttp\Client;
 
 /**
  * Class Http
+ *
+ * Maybe we use this? https://github.com/mattstauffer/Torch/blob/master/components/http/index.php
+ *
  * @package Http
  * @author Adam Patterson <http://github.com/adampatterson>
  * @link  https://github.com/adampatterson/Http
