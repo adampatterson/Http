@@ -14,15 +14,13 @@ This script is still under development.
 
 ## Tests
 
+```bash
+$ composer install
+composer run-script test
 ```
-$ composer global require phpunit/phpunit
-$ export PATH=~/.composer/vendor/bin:$PATH
-$ which phpunit
-~/.composer/vendor/bin/phpunit
-```
-
-`composer run-script test`
 
 ## Local Dev
 
-`ln -s ~/Sites/personal/_packages/Http/ ~/Sites/personal/projectName/vendor/adampatterson/http`
+```bash
+ln -s ~/Sites/packages/Http/ ~/Sites/projectName/vendor/adampatterson/http
+```
