@@ -12,10 +12,14 @@ This script is still under development.
 
 ## Install from [Packagist](https://packagist.org/packages/adampatterson/http)
 
+```bash
+composer require adampatterson/http
+```
+
 ## Tests
 
 ```bash
-$ composer install
+composer install
 composer run-script test
 ```
 
