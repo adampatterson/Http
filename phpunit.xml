@@ -2,21 +2,13 @@
 <phpunit
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         bootstrap="vendor/autoload.php"
-        backupGlobals="false"
-        backupStaticAttributes="false"
         colors="true"
-        verbose="true"
-        convertErrorsToExceptions="true"
-        convertNoticesToExceptions="true"
-        convertWarningsToExceptions="true"
-        processIsolation="false"
-        stopOnFailure="false"
-        xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.3/phpunit.xsd">
- <coverage>
+        xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/13.0/phpunit.xsd">
+  <source>
     <include>
       <directory suffix=".php">src/</directory>
     </include>
-  </coverage>
+  </source>
   <testsuites>
     <testsuite name="Http Tests">
       <directory>tests</directory>

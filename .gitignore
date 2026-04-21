@@ -1,5 +1,7 @@
 /vendor
 composer.lock
 .idea
+.src
 .DS_Store
 /.phpunit.result.cache
+/.phpunit.cache

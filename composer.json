@@ -18,16 +18,19 @@
     "source": "https://github.com/adampatterson/Http"
   },
   "require-dev": {
-    "phpunit/phpunit": "^9.5"
+    "phpunit/phpunit": "^13.0"
   },
   "require": {
     "guzzlehttp/guzzle": "^7.4",
-    "tightenco/collect": "^8.34"
+    "illuminate/collections": "^11.0"
   },
   "autoload": {
     "psr-4": {
       "Http\\": "src/"
-    }
+    },
+    "files": [
+      "src/helpers.php"
+    ]
   },
   "scripts": {
     "test": "phpunit"
