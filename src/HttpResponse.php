@@ -154,12 +154,12 @@ class HttpResponse
     /**
      * Proxy unknown method calls to the underlying PSR-7 response instance.
      *
-     * @param string $method
-     * @param array<int, mixed> $args
+     * @param  string  $method
+     * @param  array<int, mixed>  $args
      *
      * @return mixed
      */
-    public function __call($method, $args)
+    public function __call(string $method, array $args)
     {
         return $this->response->{$method}(...$args);
     }

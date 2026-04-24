@@ -14,12 +14,14 @@ use GuzzleHttp\Client;
 class Http
 {
     /**
-     * @param $method
-     * @param $args
+     * Handles static calls to the MakeHttpRequest instance.
+     *
+     * @param  string  $method
+     * @param  array  $args
      *
      * @return mixed
      */
-    public static function __callStatic($method, $args)
+    public static function __callStatic(string $method, array $args)
     {
         return MakeHttpRequest::new()->{$method}(...$args);
     }

@@ -62,7 +62,7 @@ class MakeHttpRequest
      *
      * @return MakeHttpRequest
      */
-    static function new(...$args)
+    public static function new(...$args): self
     {
         return new self(...$args);
     }
