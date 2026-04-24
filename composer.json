@@ -1,6 +1,6 @@
 {
   "name": "adampatterson/http",
-  "description": "",
+  "description": "A simple Guzzle wrapper",
   "keywords": [
     "http",
     "guzzle"
@@ -14,15 +14,15 @@
     }
   ],
   "support": {
-    "issues": "https://github.com/adampatterson/Http/issues",
-    "source": "https://github.com/adampatterson/Http"
+    "issues": "https://github.com/adampatterson/http/issues",
+    "source": "https://github.com/adampatterson/http"
   },
   "require-dev": {
     "phpunit/phpunit": "^13.0"
   },
   "require": {
     "guzzlehttp/guzzle": "^7.4",
-    "illuminate/collections": "^11.0"
+    "illuminate/collections": "^v11.6.0"
   },
   "autoload": {
     "psr-4": {
