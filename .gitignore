@@ -1,6 +1,7 @@
 /vendor
 composer.lock
 .idea
+.tinker
 .junie
 .src
 .DS_Store
