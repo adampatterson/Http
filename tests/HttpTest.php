@@ -241,6 +241,20 @@ class HttpTest extends TestCase
         $this->assertEquals('test-value', $response->header('X-Custom-Header'));
     }
 
+    #[Test]
+    public function proxies_method_calls_to_the_underlying_response(): void
+    {
+        $mock = new MockHandler([
+            new Response(200, [], null, '1.1'),
+        ]);
+        $handlerStack = HandlerStack::create($mock);
+        $client = new Client(['handler' => $handlerStack]);
+
+        $response = $this->makeRequestWithMockClient($client);
+
+        $this->assertEquals('1.1', $response->getProtocolVersion());
+    }
+
     private function makeRequestWithMockClient(Client $client): mixed
     {
         $request = new class extends MakeHttpRequest {
