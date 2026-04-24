@@ -5,10 +5,13 @@ namespace Http\Response;
 
 use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\TransferStats;
+use Psr\Http\Message\UriInterface;
 
 /**
  * Class HttpResponse
  * @package Http
+ *
+ * @mixin Response
  */
 class HttpResponse
 {
@@ -85,7 +88,7 @@ class HttpResponse
         return $this->response->getStatusCode();
     }
 
-    public function effectiveUri(): \Psr\Http\Message\UriInterface
+    public function effectiveUri(): UriInterface
     {
         return $this->transferStats->getEffectiveUri();
     }

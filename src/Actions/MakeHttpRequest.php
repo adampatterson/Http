@@ -46,18 +46,26 @@ class MakeHttpRequest
     private Collection $beforeSendingCallbacks;
 
     /**
-     * MakeHttpRequest constructor.
+     * @var Client|null
      */
-    public function __construct()
+    private ?Client $client;
+
+    /**
+     * MakeHttpRequest constructor.
+     * @param  Client|null  $client
+     */
+    public function __construct(?Client $client = null)
     {
-        $this->beforeSendingCallbacks = collect(function ($request, $options) {
-            $this->cookies = $options['cookies'];
-        });
+        $this->client = $client;
 
         $this->options = [
             'headers'     => [],
             'http_errors' => false,
         ];
+
+        $this->beforeSendingCallbacks = collect(function ($request, $options) {
+            $this->cookies = $options['cookies'];
+        });
     }
 
     /**
@@ -73,7 +81,7 @@ class MakeHttpRequest
     /**
      * @return $this
      */
-    function asJson()
+    public function asJson()
     {
         return $this->bodyFormat('json')->contentType('application/json');
     }
@@ -81,7 +89,7 @@ class MakeHttpRequest
     /**
      * @return $this
      */
-    function asFormParams()
+    public function asFormParams()
     {
         return $this->bodyFormat('form_params')->contentType('application/x-www-form-urlencoded');
     }
@@ -89,7 +97,7 @@ class MakeHttpRequest
     /**
      * @return $this
      */
-    function asMultipart()
+    public function asMultipart()
     {
         return $this->bodyFormat('multipart');
     }
@@ -99,7 +107,7 @@ class MakeHttpRequest
      *
      * @return $this
      */
-    function bodyFormat($format)
+    public function bodyFormat($format)
     {
         return tap($this, function ($request) use ($format) {
             $this->bodyFormat = $format;
@@ -111,7 +119,7 @@ class MakeHttpRequest
      *
      * @return $this
      */
-    function contentType($contentType)
+    public function contentType($contentType)
     {
         return $this->withHeaders(['Content-Type' => $contentType]);
     }
@@ -150,7 +158,7 @@ class MakeHttpRequest
      * @return HttpResponse
      * @throws HandleRequestException
      */
-    public function get(string $url, $query = null)
+    public function get(string $url, mixed $query = null): HttpResponse
     {
         return $this->send('GET', $url, [
             'query' => $query,
@@ -164,7 +172,7 @@ class MakeHttpRequest
      * @return HttpResponse
      * @throws HandleRequestException
      */
-    public function post(string $url, $params = null)
+    public function post(string $url, mixed $params = null): HttpResponse
     {
         return $this->send('POST', $url, [
             $this->bodyFormat => $params,
@@ -178,7 +186,7 @@ class MakeHttpRequest
      * @return HttpResponse
      * @throws HandleRequestException
      */
-    public function patch(string $url, $params = null)
+    public function patch(string $url, mixed $params = null): HttpResponse
     {
         return $this->send('PATCH', $url, [
             $this->bodyFormat => $params,
@@ -192,7 +200,7 @@ class MakeHttpRequest
      * @return HttpResponse
      * @throws HandleRequestException
      */
-    public function put(string $url, $params = null)
+    public function put(string $url, mixed $params = null): HttpResponse
     {
         return $this->send('PUT', $url, [
             $this->bodyFormat => $params,
@@ -206,7 +214,7 @@ class MakeHttpRequest
      * @return HttpResponse
      * @throws HandleRequestException
      */
-    public function delete(string $url, $params = null): HttpResponse
+    public function delete(string $url, mixed $params = null): HttpResponse
     {
         return $this->send('DELETE', $url, [
             $this->bodyFormat => $params,
@@ -268,36 +276,7 @@ class MakeHttpRequest
      */
     public function client(): Client
     {
-        return new Client();
-    }
-
-    /**
-     * @return int
-     */
-    public function status(): int
-    {
-        return $this->response->getStatusCode();
-    }
-
-    /**
-     * @return string
-     */
-    public function body(): string
-    {
-        return (string)$this->response->getBody();
-    }
-
-    /**
-     * @return mixed
-     * @throws \JsonException
-     */
-    public function json(): mixed
-    {
-        return json_decode($this->response->getBody()
-            ->getContents(),
-            false,
-            flags: JSON_THROW_ON_ERROR
-        );
+        return $this->client ?: new Client();
     }
 }
 

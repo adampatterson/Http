@@ -4,35 +4,52 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Response;
-use Http\Actions\MakeHttpRequest;
+use Http\Http;
+use GuzzleHttp\Middleware;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
 class HttpTest extends TestCase
 {
+    private array $container = [];
+
+    protected function setUp(): void
+    {
+        $this->container = [];
+    }
+
+    private function mockResponse(array $responses = []): void
+    {
+        if (empty($responses)) {
+            $responses = [new Response(200)];
+        }
+
+        $mock = new MockHandler($responses);
+        $handlerStack = HandlerStack::create($mock);
+        $handlerStack->push(Middleware::history($this->container));
+
+        Http::swap(new Client(['handler' => $handlerStack]));
+    }
+
     #[Test]
     public function returnsResponseWithStatusCode(): void
     {
-        $mock = new MockHandler([
+        $this->mockResponse([
             new Response(200, [], json_encode(['success' => true])),
         ]);
-        $handlerStack = HandlerStack::create($mock);
-        $client = new Client(['handler' => $handlerStack]);
 
-        $this->assertEquals(200, $this->makeRequestWithMockClient($client)->status());
+        $this->assertEquals(200, Http::get('https://example.com')->status());
     }
 
     #[Test]
     public function returnsResponseBody(): void
     {
         $body = json_encode(['id' => 1, 'name' => 'Test']);
-        $mock = new MockHandler([
+        $this->mockResponse([
             new Response(200, [], $body),
         ]);
-        $handlerStack = HandlerStack::create($mock);
-        $client = new Client(['handler' => $handlerStack]);
 
-        $response = $this->makeRequestWithMockClient($client);
+        $response = Http::get('https://example.com');
         $this->assertEquals($body, $response->body());
     }
 
@@ -40,237 +57,155 @@ class HttpTest extends TestCase
     public function decodesJsonResponse(): void
     {
         $data = ['id' => 1, 'name' => 'Test'];
-        $mock = new MockHandler([
+        $this->mockResponse([
             new Response(200, ['Content-Type' => 'application/json'], json_encode($data)),
         ]);
-        $handlerStack = HandlerStack::create($mock);
-        $client = new Client(['handler' => $handlerStack]);
 
-        $response = $this->makeRequestWithMockClient($client);
+        $response = Http::get('https://example.com');
         $this->assertEquals($data, $response->json());
     }
 
     #[Test]
     public function setsJsonBodyFormat(): void
     {
-        $mock = new MockHandler([
+        $this->mockResponse([
             new Response(201, []),
         ]);
-        $handlerStack = HandlerStack::create($mock);
-        $client = new Client(['handler' => $handlerStack]);
 
-        $request = new class extends MakeHttpRequest {
-            private Client $mockClient;
+        $response = Http::asJson()
+            ->post('https://example.com', ['key' => 'value']);
 
-            public function setMockClient(Client $client): static
-            {
-                $this->mockClient = $client;
-                return $this;
-            }
-
-            public function client(): Client
-            {
-                return $this->mockClient;
-            }
-        };
-
-        $response = $request->setMockClient($client)->asJson()->post('https://example.com', ['key' => 'value']);
         $this->assertEquals(201, $response->status());
+
+        $sentRequest = $this->container[0]['request'];
+        $this->assertEquals('application/json', $sentRequest->getHeaderLine('Content-Type'));
+        $this->assertEquals(json_encode(['key' => 'value']), (string) $sentRequest->getBody());
     }
 
     #[Test]
     public function setsFormParamsBodyFormat(): void
     {
-        $mock = new MockHandler([
+        $this->mockResponse([
             new Response(200, []),
         ]);
-        $handlerStack = HandlerStack::create($mock);
-        $client = new Client(['handler' => $handlerStack]);
 
-        $request = new class extends MakeHttpRequest {
-            private Client $mockClient;
+        $response = Http::asFormParams()
+            ->post('https://example.com', ['field' => 'value']);
 
-            public function setMockClient(Client $client): static
-            {
-                $this->mockClient = $client;
-                return $this;
-            }
-
-            public function client(): Client
-            {
-                return $this->mockClient;
-            }
-        };
-
-        $response = $request->setMockClient($client)->asFormParams()->post('https://example.com', ['field' => 'value']);
         $this->assertEquals(200, $response->status());
+
+        $sentRequest = $this->container[0]['request'];
+        $this->assertEquals('application/x-www-form-urlencoded', $sentRequest->getHeaderLine('Content-Type'));
+        $this->assertEquals('field=value', (string) $sentRequest->getBody());
     }
 
     #[Test]
     public function setsAuthorizationHeader(): void
     {
-        $mock = new MockHandler([
+        $this->mockResponse([
             new Response(200, []),
         ]);
-        $handlerStack = HandlerStack::create($mock);
-        $client = new Client(['handler' => $handlerStack]);
 
-        $request = new class extends MakeHttpRequest {
-            private Client $mockClient;
+        $response = Http::withToken('my-secret-token')
+            ->get('https://example.com');
 
-            public function setMockClient(Client $client): static
-            {
-                $this->mockClient = $client;
-                return $this;
-            }
-
-            public function client(): Client
-            {
-                return $this->mockClient;
-            }
-        };
-
-        $response = $request->setMockClient($client)->withToken('my-secret-token')->get('https://example.com');
         $this->assertEquals(200, $response->status());
+
+        $sentRequest = $this->container[0]['request'];
+        $this->assertEquals('Bearer my-secret-token', $sentRequest->getHeaderLine('Authorization'));
     }
 
     #[Test]
     public function addsCustomHeaders(): void
     {
-        $mock = new MockHandler([
+        $this->mockResponse([
             new Response(200, []),
         ]);
-        $handlerStack = HandlerStack::create($mock);
-        $client = new Client(['handler' => $handlerStack]);
 
-        $request = new class extends MakeHttpRequest {
-            private Client $mockClient;
+        $response = Http::withHeaders(['X-Custom' => 'value'])
+            ->get('https://example.com');
 
-            public function setMockClient(Client $client): static
-            {
-                $this->mockClient = $client;
-                return $this;
-            }
-
-            public function client(): Client
-            {
-                return $this->mockClient;
-            }
-        };
-
-        $response = $request->setMockClient($client)->withHeaders(['X-Custom' => 'value'])->get('https://example.com');
         $this->assertEquals(200, $response->status());
+
+        $sentRequest = $this->container[0]['request'];
+        $this->assertEquals('value', $sentRequest->getHeaderLine('X-Custom'));
     }
 
     #[Test]
     public function checksSuccessfulResponse(): void
     {
-        $mock = new MockHandler([
+        $this->mockResponse([
             new Response(200, []),
         ]);
-        $handlerStack = HandlerStack::create($mock);
-        $client = new Client(['handler' => $handlerStack]);
 
-        $response = $this->makeRequestWithMockClient($client);
+        $response = Http::get('https://example.com');
         $this->assertTrue($response->isSuccess());
     }
 
     #[Test]
     public function checksOkResponse(): void
     {
-        $mock = new MockHandler([
+        $this->mockResponse([
             new Response(200, []),
         ]);
-        $handlerStack = HandlerStack::create($mock);
-        $client = new Client(['handler' => $handlerStack]);
 
-        $response = $this->makeRequestWithMockClient($client);
+        $response = Http::get('https://example.com');
         $this->assertTrue($response->isOk());
     }
 
     #[Test]
     public function checksClientErrorResponse(): void
     {
-        $mock = new MockHandler([
+        $this->mockResponse([
             new Response(400, []),
         ]);
-        $handlerStack = HandlerStack::create($mock);
-        $client = new Client(['handler' => $handlerStack]);
 
-        $response = $this->makeRequestWithMockClient($client);
+        $response = Http::get('https://example.com');
         $this->assertTrue($response->isClientError());
     }
 
     #[Test]
     public function checksServerErrorResponse(): void
     {
-        $mock = new MockHandler([
+        $this->mockResponse([
             new Response(500, []),
         ]);
-        $handlerStack = HandlerStack::create($mock);
-        $client = new Client(['handler' => $handlerStack]);
 
-        $response = $this->makeRequestWithMockClient($client);
+        $response = Http::get('https://example.com');
         $this->assertTrue($response->isServerError());
     }
 
     #[Test]
     public function checksRedirectResponse(): void
     {
-        $mock = new MockHandler([
+        $this->mockResponse([
             new Response(301, []),
         ]);
-        $handlerStack = HandlerStack::create($mock);
-        $client = new Client(['handler' => $handlerStack]);
 
-        $response = $this->makeRequestWithMockClient($client);
+        $response = Http::get('https://example.com');
         $this->assertTrue($response->isRedirect());
     }
 
     #[Test]
     public function returnsResponseHeaders(): void
     {
-        $mock = new MockHandler([
+        $this->mockResponse([
             new Response(200, ['X-Custom-Header' => 'test-value']),
         ]);
-        $handlerStack = HandlerStack::create($mock);
-        $client = new Client(['handler' => $handlerStack]);
 
-        $response = $this->makeRequestWithMockClient($client);
+        $response = Http::get('https://example.com');
         $this->assertEquals('test-value', $response->header('X-Custom-Header'));
     }
 
     #[Test]
     public function proxies_method_calls_to_the_underlying_response(): void
     {
-        $mock = new MockHandler([
+        $this->mockResponse([
             new Response(200, [], null, '1.1'),
         ]);
-        $handlerStack = HandlerStack::create($mock);
-        $client = new Client(['handler' => $handlerStack]);
 
-        $response = $this->makeRequestWithMockClient($client);
+        $response = Http::get('https://example.com');
 
         $this->assertEquals('1.1', $response->getProtocolVersion());
-    }
-
-    private function makeRequestWithMockClient(Client $client): mixed
-    {
-        $request = new class extends MakeHttpRequest {
-            private Client $mockClient;
-
-            public function setMockClient(Client $client): static
-            {
-                $this->mockClient = $client;
-                return $this;
-            }
-
-            public function client(): Client
-            {
-                return $this->mockClient;
-            }
-        };
-
-        return $request->setMockClient($client)->get('https://example.com');
     }
 }
