@@ -1,6 +1,7 @@
 /vendor
 composer.lock
 .idea
+.junie
 .src
 .DS_Store
 /.phpunit.result.cache
