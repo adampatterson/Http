@@ -1,6 +1,7 @@
 <?php
 
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Response;
@@ -29,40 +30,6 @@ class HttpTest extends TestCase
         $handlerStack->push(Middleware::history($this->container));
 
         Http::swap(new Client(['handler' => $handlerStack]));
-    }
-
-    #[Test]
-    public function returnsResponseWithStatusCode(): void
-    {
-        $this->mockResponse([
-            new Response(200, [], json_encode(['success' => true])),
-        ]);
-
-        $this->assertEquals(200, Http::get('https://example.com')->status());
-    }
-
-    #[Test]
-    public function returnsResponseBody(): void
-    {
-        $body = json_encode(['id' => 1, 'name' => 'Test']);
-        $this->mockResponse([
-            new Response(200, [], $body),
-        ]);
-
-        $response = Http::get('https://example.com');
-        $this->assertEquals($body, $response->body());
-    }
-
-    #[Test]
-    public function decodesJsonResponse(): void
-    {
-        $data = ['id' => 1, 'name' => 'Test'];
-        $this->mockResponse([
-            new Response(200, ['Content-Type' => 'application/json'], json_encode($data)),
-        ]);
-
-        $response = Http::get('https://example.com');
-        $this->assertEquals($data, $response->json());
     }
 
     #[Test]
@@ -132,72 +99,6 @@ class HttpTest extends TestCase
     }
 
     #[Test]
-    public function checksSuccessfulResponse(): void
-    {
-        $this->mockResponse([
-            new Response(200, []),
-        ]);
-
-        $response = Http::get('https://example.com');
-        $this->assertTrue($response->isSuccess());
-    }
-
-    #[Test]
-    public function checksOkResponse(): void
-    {
-        $this->mockResponse([
-            new Response(200, []),
-        ]);
-
-        $response = Http::get('https://example.com');
-        $this->assertTrue($response->isOk());
-    }
-
-    #[Test]
-    public function checksClientErrorResponse(): void
-    {
-        $this->mockResponse([
-            new Response(400, []),
-        ]);
-
-        $response = Http::get('https://example.com');
-        $this->assertTrue($response->isClientError());
-    }
-
-    #[Test]
-    public function checksServerErrorResponse(): void
-    {
-        $this->mockResponse([
-            new Response(500, []),
-        ]);
-
-        $response = Http::get('https://example.com');
-        $this->assertTrue($response->isServerError());
-    }
-
-    #[Test]
-    public function checksRedirectResponse(): void
-    {
-        $this->mockResponse([
-            new Response(301, []),
-        ]);
-
-        $response = Http::get('https://example.com');
-        $this->assertTrue($response->isRedirect());
-    }
-
-    #[Test]
-    public function returnsResponseHeaders(): void
-    {
-        $this->mockResponse([
-            new Response(200, ['X-Custom-Header' => 'test-value']),
-        ]);
-
-        $response = Http::get('https://example.com');
-        $this->assertEquals('test-value', $response->header('X-Custom-Header'));
-    }
-
-    #[Test]
     public function proxies_method_calls_to_the_underlying_response(): void
     {
         $this->mockResponse([
@@ -207,5 +108,118 @@ class HttpTest extends TestCase
         $response = Http::get('https://example.com');
 
         $this->assertEquals('1.1', $response->getProtocolVersion());
+    }
+
+    #[Test]
+    public function it_can_determine_if_the_response_is_success(): void
+    {
+        $this->mockResponse([
+            new Response(200),
+            new Response(200),
+        ]);
+
+        $this->assertTrue(Http::get('https://example.com')->isSuccess());
+        $this->assertTrue(Http::get('https://example.com')->isOk());
+    }
+
+    #[Test]
+    public function it_can_determine_if_the_response_is_redirect(): void
+    {
+        $this->mockResponse([
+            new Response(302),
+        ]);
+
+        $this->assertTrue(Http::get('https://example.com')->isRedirect());
+    }
+
+    #[Test]
+    public function it_can_determine_if_the_response_is_client_error(): void
+    {
+        $this->mockResponse([
+            new Response(400),
+        ]);
+
+        $this->assertTrue(Http::get('https://example.com')->isClientError());
+    }
+
+    #[Test]
+    public function setsMultipartBodyFormat(): void
+    {
+        $this->mockResponse([
+            new Response(200, []),
+        ]);
+
+        $response = Http::asMultipart()
+            ->post('https://example.com', [
+                [
+                    'name'     => 'foo',
+                    'contents' => 'bar'
+                ]
+            ]);
+
+        $this->assertEquals(200, $response->status());
+
+        $sentRequest = $this->container[0]['request'];
+        $this->assertStringContainsString('multipart/form-data', $sentRequest->getHeaderLine('Content-Type'));
+    }
+
+    #[Test]
+    public function performsPatchRequest(): void
+    {
+        $this->mockResponse();
+        Http::patch('https://example.com', ['foo' => 'bar']);
+        $this->assertEquals('PATCH', $this->container[0]['request']->getMethod());
+    }
+
+    #[Test]
+    public function performsPutRequest(): void
+    {
+        $this->mockResponse();
+        Http::put('https://example.com', ['foo' => 'bar']);
+        $this->assertEquals('PUT', $this->container[0]['request']->getMethod());
+    }
+
+    #[Test]
+    public function performsDeleteRequest(): void
+    {
+        $this->mockResponse();
+        Http::delete('https://example.com', ['foo' => 'bar']);
+        $this->assertEquals('DELETE', $this->container[0]['request']->getMethod());
+    }
+
+    #[Test]
+    public function parsesQueryParamsFromUrl(): void
+    {
+        $this->mockResponse();
+        Http::get('https://example.com?foo=bar&baz=qux');
+
+        $sentRequest = $this->container[0]['request'];
+        $this->assertEquals('foo=bar&baz=qux', $sentRequest->getUri()->getQuery());
+    }
+
+    #[Test]
+    public function it_uses_default_client_if_none_provided(): void
+    {
+        // This test doesn't use Http::swap(), so MakeHttpRequest will instantiate its own Client.
+        // We can't easily mock the response without swap(), but we can at least verify it doesn't crash
+        // and covers the default branch in client().
+
+        $request = new \Http\Actions\MakeHttpRequest();
+        $this->assertInstanceOf(Client::class, $request->client());
+    }
+
+    #[Test]
+    public function throwsHandleRequestExceptionOnConnectError(): void
+    {
+        $mock = new MockHandler([
+            new ConnectException('Connection failed', new \GuzzleHttp\Psr7\Request('GET', 'test')),
+        ]);
+        $handlerStack = HandlerStack::create($mock);
+        Http::swap(new Client(['handler' => $handlerStack]));
+
+        $this->expectException(\Http\Exceptions\HandleRequestException::class);
+        $this->expectExceptionMessage('Connection failed');
+
+        Http::get('https://example.com');
     }
 }

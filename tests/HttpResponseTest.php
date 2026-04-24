@@ -2,6 +2,7 @@
 use GuzzleHttp\Client;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Response;
 use Http\Http;
 use PHPUnit\Framework\Attributes\Test;
@@ -17,6 +18,16 @@ class HttpResponseTest extends TestCase
         $handlerStack = HandlerStack::create($mock);
 
         Http::swap(new Client(['handler' => $handlerStack]));
+    }
+
+    #[Test]
+    public function status_returns_status_code(): void
+    {
+        $this->mockResponse(200);
+        $this->assertEquals(200, Http::get('https://example.com')->status());
+
+        $this->mockResponse(404);
+        $this->assertEquals(404, Http::get('https://example.com')->status());
     }
 
     #[Test]
@@ -105,6 +116,30 @@ class HttpResponseTest extends TestCase
     {
         $this->mockResponse(200, ['X-Foo' => 'Bar']);
         $this->assertEquals('Bar', Http::get('https://example.com')->header('X-Foo'));
+    }
+
+    #[Test]
+    public function it_can_return_effective_uri(): void
+    {
+        $container = [];
+        $mock = new MockHandler([new Response(200)]);
+        $handlerStack = HandlerStack::create($mock);
+        $handlerStack->push(Middleware::history($container));
+        
+        $client = new Client(['handler' => $handlerStack]);
+        Http::swap($client);
+
+        $response = Http::get('https://example.com');
+        
+        $this->assertEquals('https://example.com', (string) $response->effectiveUri());
+    }
+
+    #[Test]
+    public function it_can_return_cookies(): void
+    {
+        $this->mockResponse(200);
+        $response = Http::get('https://example.com');
+        $this->assertNull($response->cookies());
     }
 
     #[Test]

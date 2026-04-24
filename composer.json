@@ -35,6 +35,6 @@
   },
   "scripts": {
     "test": "phpunit",
-    "test-coverage": "XDEBUG_MODE=coverage phpunit --coverage-text"
+    "test:coverage": "XDEBUG_MODE=coverage phpunit --coverage-text"
   }
 }

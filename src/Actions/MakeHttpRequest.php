@@ -41,11 +41,6 @@ class MakeHttpRequest
     private $transferStats;
 
     /**
-     * @var Collection
-     */
-    private Collection $beforeSendingCallbacks;
-
-    /**
      * @var Client|null
      */
     private ?Client $client;
@@ -62,10 +57,6 @@ class MakeHttpRequest
             'headers'     => [],
             'http_errors' => false,
         ];
-
-        $this->beforeSendingCallbacks = collect(function ($request, $options) {
-            $this->cookies = $options['cookies'];
-        });
     }
 
     /**
