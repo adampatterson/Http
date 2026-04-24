@@ -1,8 +1,11 @@
 <?php
 
-namespace Http;
+namespace Http\Actions;
 
+use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ConnectException;
+use Http\Exceptions\HandleRequestException;
+use Http\Response\HttpResponse;
 use Illuminate\Support\Collection;
 
 /**
@@ -131,7 +134,7 @@ class MakeHttpRequest
      *
      * @return $this
      */
-    function withHeaders($headers)
+    public function withHeaders($headers)
     {
         return tap($this, function ($request) use ($headers) {
             return $this->options = array_merge_recursive($this->options, [
@@ -261,11 +264,11 @@ class MakeHttpRequest
     }
 
     /**
-     * @return \GuzzleHttp\Client
+     * @return Client
      */
-    public function client(): \GuzzleHttp\Client
+    public function client(): Client
     {
-        return new \GuzzleHttp\Client();
+        return new Client();
     }
 
     /**

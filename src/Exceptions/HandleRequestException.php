@@ -1,6 +1,6 @@
 <?php
 
-namespace Http;
+namespace Http\Exceptions;
 
 /**
  * Class HandleRequestException

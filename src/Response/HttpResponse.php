@@ -1,11 +1,10 @@
 <?php
 
-namespace Http;
+namespace Http\Response;
 
 
 use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\TransferStats;
-use Override;
 
 /**
  * Class HttpResponse
@@ -47,7 +46,6 @@ class HttpResponse
 
     /**
      * @return mixed
-     * @throws JsonException
      * @throws \JsonException
      */
     public function json(): mixed
@@ -74,23 +72,20 @@ class HttpResponse
      */
     public function headers(): array
     {
-        return collect($this->response->getHeaders())->mapWithKeys(function ($v, $k) {
-            return [$k => $v[0]];
+        return collect($this->response->getHeaders())->mapWithKeys(function ($value, $key) {
+            return [$key => $value[0]];
         })->all();
     }
 
     /**
      * @return int
      */
-    public function status()
+    public function status(): int
     {
         return $this->response->getStatusCode();
     }
 
-    /**
-     * @return \Psr\Http\Message\UriInterface
-     */
-    public function effectiveUri()
+    public function effectiveUri(): \Psr\Http\Message\UriInterface
     {
         return $this->transferStats->getEffectiveUri();
     }

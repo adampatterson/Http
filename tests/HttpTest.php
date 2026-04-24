@@ -1,11 +1,10 @@
 <?php
 
-use Http\Http;
-use Http\MakeHttpRequest;
 use GuzzleHttp\Client;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Response;
+use Http\Actions\MakeHttpRequest;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 

@@ -2,7 +2,7 @@
 
 namespace Http;
 
-use GuzzleHttp\Client;
+use Http\Actions\MakeHttpRequest;
 
 /**
  * Class Http
