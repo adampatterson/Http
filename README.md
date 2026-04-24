@@ -71,6 +71,14 @@ composer install
 composer test
 ```
 
+### Code Coverage
+
+To run tests with code coverage, ensure you have Xdebug installed and run:
+
+```shell
+composer test-coverage
+```
+
 ## Local Dev
 
 Without needing to modify the composer.json file. Run from the theme root, this will symlink the package into the theme's vendor directory.
