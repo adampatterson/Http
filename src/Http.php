@@ -10,7 +10,7 @@ use Http\Actions\MakeHttpRequest;
  *
  * @package Http
  * @author Adam Patterson <http://github.com/adampatterson>
- * @link  https://github.com/adampatterson/Http
+ * @link  https://github.com/adampatterson/http
  *
  * @mixin MakeHttpRequest
  * @method static MakeHttpRequest asJson()

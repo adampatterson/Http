@@ -86,16 +86,18 @@ composer test-coverage
 Without needing to modify the composer.json file. Run from the theme root, this will symlink the package into the theme's vendor directory.
 
 ```shell
-ln -s ~/Sites/packages/Http/ ./vendor/adampatterson/http
+ln -s ~/Sites/packages/http/ ./vendor/adampatterson/http
 ```
 
 Otherwise, you can add the local package to your `composer.json` file.
 
-```shell
-"repositories": [
+```json
+{
+  "repositories": [
     {
-        "type": "path",
-        "url": "/Sites/packages/http"
+      "type": "path",
+      "url": "/Sites/packages/http"
     }
-],
+  ]
+}
 ```
