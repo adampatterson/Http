@@ -13,6 +13,22 @@ use Http\Actions\MakeHttpRequest;
  * @link  https://github.com/adampatterson/Http
  *
  * @mixin MakeHttpRequest
+ * @method static MakeHttpRequest asJson()
+ * @method static MakeHttpRequest asFormParams()
+ * @method static MakeHttpRequest asMultipart()
+ * @method static MakeHttpRequest bodyFormat(mixed $format)
+ * @method static MakeHttpRequest contentType(mixed $contentType)
+ * @method static MakeHttpRequest withToken(mixed $token, string $type = 'Bearer')
+ * @method static MakeHttpRequest withHeaders(mixed $headers)
+ * @method static \Http\Response\HttpResponse get(string $url, mixed $query = null)
+ * @method static \Http\Response\HttpResponse post(string $url, mixed $params = null)
+ * @method static \Http\Response\HttpResponse patch(string $url, mixed $params = null)
+ * @method static \Http\Response\HttpResponse put(string $url, mixed $params = null)
+ * @method static \Http\Response\HttpResponse delete(string $url, mixed $params = null)
+ * @method static \Http\Response\HttpResponse send(string $method, string $url, array $options = [])
+ * @method static array mergeOptions(mixed ...$options)
+ * @method static mixed parseQueryParams(mixed $url)
+ * @method static Client client()
  */
 class Http
 {
