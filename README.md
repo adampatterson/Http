@@ -1,6 +1,8 @@
 # HTTP PHP
 
-![PHP Composer](https://github.com/adampatterson/Http/workflows/PHP%20Composer/badge.svg?branch=main)
+![PHP Composer](https://github.com/adampatterson/http/workflows/run-tests/badge.svg?branch=main)
+[![Packagist Version](https://img.shields.io/packagist/v/adampatterson/http)](https://packagist.org/packages/adampatterson/http)
+[![Packagist Downloads](https://img.shields.io/packagist/dt/adampatterson/http)](https://packagist.org/packages/adampatterson/http/stats)
 
 Started off as a little wrapper around Guzzle, now is a clone of ZTTP.
 
