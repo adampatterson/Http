@@ -24,7 +24,11 @@ class Http
     /**
      * Swap the client instance.
      *
-     * @param  Client  $client
+     * This is primarily useful for testing, allowing a mock or fake Guzzle
+     * client to be injected so that HTTP calls can be simulated without
+     * making real network requests.
+     *
+     * @param  Client  $client  A custom or mock Guzzle client instance.
      * @return void
      */
     public static function swap(Client $client): void
@@ -44,6 +48,10 @@ class Http
      */
     public static function __callStatic(string $method, array $args)
     {
+        if (static::$client === null) {
+            static::$client = new Client();
+        }
+
         return MakeHttpRequest::new(static::$client)->{$method}(...$args);
     }
 }

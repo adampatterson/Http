@@ -51,7 +51,7 @@ class MakeHttpRequest
      */
     public function __construct(?Client $client = null)
     {
-        $this->client = $client;
+        $this->client = $client ?: new Client();
 
         $this->options = [
             'headers'     => [],
@@ -267,7 +267,7 @@ class MakeHttpRequest
      */
     public function client(): Client
     {
-        return $this->client ?: new Client();
+        return $this->client;
     }
 }
 

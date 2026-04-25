@@ -202,7 +202,7 @@ class HttpTest extends TestCase
     {
         // This test doesn't use Http::swap(), so MakeHttpRequest will instantiate its own Client.
         // We can't easily mock the response without swap(), but we can at least verify it doesn't crash
-        // and covers the default branch in client().
+        // and covers the default branch in constructor.
 
         $request = new \Http\Actions\MakeHttpRequest();
         $this->assertInstanceOf(Client::class, $request->client());
