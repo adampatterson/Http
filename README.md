@@ -4,8 +4,6 @@
 [![Packagist Version](https://img.shields.io/packagist/v/adampatterson/http)](https://packagist.org/packages/adampatterson/http)
 [![Packagist Downloads](https://img.shields.io/packagist/dt/adampatterson/http)](https://packagist.org/packages/adampatterson/http/stats)
 
-Started off as a little wrapper around Guzzle, now is a clone of ZTTP.
-
 > [!NOTE]
 > This script is still under development.
 
