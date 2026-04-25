@@ -41,6 +41,11 @@ $response = Http::withToken('your-token')->get('https://example.com/api/users');
 The `HttpResponse` object provides several helpers to inspect the response:
 
 ```php
+use Http\Http;
+
+// GET request
+$response = Http::get('https://example.com/api/users');
+
 $response->status(); // Get status code (int)
 $response->body();   // Get raw body (string)
 $response->json();   // Get JSON decoded body (array)
@@ -81,7 +86,7 @@ composer test-coverage
 
 ## Local Dev
 
-Without needing to modify the composer.json file. Run from the theme root, this will symlink the package into the theme's vendor directory.
+Without needing to modify the `composer.json` file. Run from the theme root, this will symlink the package into the theme's vendor directory.
 
 ```shell
 ln -s ~/Sites/packages/http/ ./vendor/adampatterson/http

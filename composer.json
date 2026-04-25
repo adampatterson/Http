@@ -19,7 +19,8 @@
   },
   "require-dev": {
     "phpunit/phpunit": "^13.0",
-    "psy/psysh": "^0.12.22"
+    "psy/psysh": "^0.12.22",
+    "symfony/var-dumper": "^8.0"
   },
   "require": {
     "guzzlehttp/guzzle": "^7.4",
@@ -35,6 +36,18 @@
   },
   "scripts": {
     "test": "phpunit",
-    "test:coverage": "XDEBUG_MODE=coverage phpunit --coverage-text"
+    "test:coverage": "XDEBUG_MODE=coverage phpunit --coverage-text",
+    "example:auth": "php examples/basic-auth.php",
+    "example:get": "php examples/get.php",
+    "example:post": "php examples/post.php"
+  },
+  "holder": {
+    "example:multiple": "php examples/multiple.php",
+    "example:cookie": "php examples/cookie.php",
+    "example:cookie_jar": "php examples/cookie_jar.php",
+    "example:preload-aliases": "php examples/preload-aliases.php",
+    "example:proxy": "php examples/proxy.php",
+    "example:session": "php examples/session.php",
+    "example:timeout": "php examples/timeout.php"
   }
 }
