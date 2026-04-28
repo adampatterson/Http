@@ -10,9 +10,5 @@ $request = Http::patch(
     params: ['mydata' => 'something']
 );
 
-// Check what we received
-dump([
-    "status" => $request->status(),
-    "collection" => $request->array(),
-]);
+render_example('Patch Request', $request);
 

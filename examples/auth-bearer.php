@@ -9,8 +9,5 @@ $token = 'my-secret-tokens';
 $request = Http::withToken($token)->get(url: 'https://httpbin.org/bearer');
 
 // Check what we received
-dump([
-    'status' => $request->status(),
-    'body'   => $request->collect(),
-]);
+render_example('Auth Bearer', $request);
 
