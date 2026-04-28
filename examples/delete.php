@@ -7,11 +7,11 @@ include "setup.php";
 // Now let's make a request!
 $response = Http::delete(
     url: 'https://httpbin.org/delete',
-    params: ['Accept' => 'application/json']
+    params: ['some' => 'value']
 );
 
 // Check what we received
 dump([
-    "status" => $response->status(),
+    "status"     => $response->status(),
     "collection" => $response->array(),
 ]);

@@ -8,7 +8,7 @@ include "setup.php";
 $response = Http::withHeaders([
     'X-Custom' => 'value',
 ])
-    ->post(url: 'https://httpbin.com/post');
+    ->post(url: 'https://httpbin.org/post');
 
 // Check what we received
 dump([

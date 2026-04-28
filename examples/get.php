@@ -7,7 +7,7 @@ include "setup.php";
 // Now let's make a request!
 $request = Http::get(
     url: 'https://httpbin.org/get',
-    query: ['Accept' => 'application/json']
+    query: ['some' => 'value']
 );
 
 // Check what we received
