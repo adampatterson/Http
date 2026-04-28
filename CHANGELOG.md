@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to `HTTP` will be documented in this file.
+All notable changes to `Http` will be documented in this file.
 
 ## Enhances test coverage, adds multiple features from Guzzle - 2026-04-28
 
