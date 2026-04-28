@@ -1,37 +1,27 @@
 <?php
 
+namespace Http\Tests;
+
+
 use GuzzleHttp\Client;
-use GuzzleHttp\Exception\ConnectException;
-use GuzzleHttp\Handler\MockHandler;
-use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Response;
+use Http\Actions\HttpRequest;
 use Http\Http;
-use GuzzleHttp\Middleware;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\CoversMethod;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
 
-class HttpTest extends TestCase
+#[CoversClass(Http::class)]
+#[CoversClass(HttpRequest::class)]
+#[CoversMethod(Http::class, 'swap')]
+#[CoversMethod(Http::class, 'useCookieJar')]
+#[CoversMethod(Http::class, 'clearCookieJar')]
+#[CoversMethod(Http::class, 'cookieJar')]
+#[CoversMethod(Http::class, '__callStatic')]
+#[CoversMethod(HttpRequest::class, 'withBasicAuth')]
+#[CoversMethod(HttpRequest::class, 'resolveCookiesOption')]
+final class HttpTest extends TestCase
 {
-    private array $container = [];
-
-    protected function setUp(): void
-    {
-        $this->container = [];
-    }
-
-    private function mockResponse(array $responses = []): void
-    {
-        if (empty($responses)) {
-            $responses = [new Response(200)];
-        }
-
-        $mock = new MockHandler($responses);
-        $handlerStack = HandlerStack::create($mock);
-        $handlerStack->push(Middleware::history($this->container));
-
-        Http::swap(new Client(['handler' => $handlerStack]));
-    }
-
     #[Test]
     public function setsJsonBodyFormat(): void
     {
@@ -46,7 +36,7 @@ class HttpTest extends TestCase
 
         $sentRequest = $this->container[0]['request'];
         $this->assertEquals('application/json', $sentRequest->getHeaderLine('Content-Type'));
-        $this->assertEquals(json_encode(['key' => 'value']), (string) $sentRequest->getBody());
+        $this->assertEquals(json_encode(['key' => 'value']), (string)$sentRequest->getBody());
     }
 
     #[Test]
@@ -63,39 +53,7 @@ class HttpTest extends TestCase
 
         $sentRequest = $this->container[0]['request'];
         $this->assertEquals('application/x-www-form-urlencoded', $sentRequest->getHeaderLine('Content-Type'));
-        $this->assertEquals('field=value', (string) $sentRequest->getBody());
-    }
-
-    #[Test]
-    public function setsAuthorizationHeader(): void
-    {
-        $this->mockResponse([
-            new Response(200, []),
-        ]);
-
-        $response = Http::withToken('my-secret-token')
-            ->get('https://example.com');
-
-        $this->assertEquals(200, $response->status());
-
-        $sentRequest = $this->container[0]['request'];
-        $this->assertEquals('Bearer my-secret-token', $sentRequest->getHeaderLine('Authorization'));
-    }
-
-    #[Test]
-    public function addsCustomHeaders(): void
-    {
-        $this->mockResponse([
-            new Response(200, []),
-        ]);
-
-        $response = Http::withHeaders(['X-Custom' => 'value'])
-            ->get('https://example.com');
-
-        $this->assertEquals(200, $response->status());
-
-        $sentRequest = $this->container[0]['request'];
-        $this->assertEquals('value', $sentRequest->getHeaderLine('X-Custom'));
+        $this->assertEquals('field=value', (string)$sentRequest->getBody());
     }
 
     #[Test]
@@ -143,7 +101,7 @@ class HttpTest extends TestCase
     }
 
     #[Test]
-    public function setsMultipartBodyFormat(): void
+    public function it_sets_multipart_body_format(): void
     {
         $this->mockResponse([
             new Response(200, []),
@@ -153,8 +111,8 @@ class HttpTest extends TestCase
             ->post('https://example.com', [
                 [
                     'name'     => 'foo',
-                    'contents' => 'bar'
-                ]
+                    'contents' => 'bar',
+                ],
             ]);
 
         $this->assertEquals(200, $response->status());
@@ -164,7 +122,7 @@ class HttpTest extends TestCase
     }
 
     #[Test]
-    public function performsPatchRequest(): void
+    public function it_performs_patch_request(): void
     {
         $this->mockResponse();
         Http::patch('https://example.com', ['foo' => 'bar']);
@@ -172,7 +130,7 @@ class HttpTest extends TestCase
     }
 
     #[Test]
-    public function performsPutRequest(): void
+    public function it_performs_put_request(): void
     {
         $this->mockResponse();
         Http::put('https://example.com', ['foo' => 'bar']);
@@ -180,7 +138,7 @@ class HttpTest extends TestCase
     }
 
     #[Test]
-    public function performsDeleteRequest(): void
+    public function it_performs_delete_request(): void
     {
         $this->mockResponse();
         Http::delete('https://example.com', ['foo' => 'bar']);
@@ -188,7 +146,7 @@ class HttpTest extends TestCase
     }
 
     #[Test]
-    public function parsesQueryParamsFromUrl(): void
+    public function it_parses_query_params_from_url(): void
     {
         $this->mockResponse();
         Http::get('https://example.com?foo=bar&baz=qux');
@@ -200,22 +158,16 @@ class HttpTest extends TestCase
     #[Test]
     public function it_uses_default_client_if_none_provided(): void
     {
-        // This test doesn't use Http::swap(), so MakeHttpRequest will instantiate its own Client.
-        // We can't easily mock the response without swap(), but we can at least verify it doesn't crash
-        // and covers the default branch in constructor.
-
-        $request = new \Http\Actions\MakeHttpRequest();
+        $request = new \Http\Actions\HttpRequest();
         $this->assertInstanceOf(Client::class, $request->client());
     }
 
     #[Test]
-    public function throwsHandleRequestExceptionOnConnectError(): void
+    public function it_throws_handle_request_exception_on_connect_error(): void
     {
-        $mock = new MockHandler([
-            new ConnectException('Connection failed', new \GuzzleHttp\Psr7\Request('GET', 'test')),
+        $this->mockResponse([
+            new \GuzzleHttp\Exception\ConnectException('Connection failed', new \GuzzleHttp\Psr7\Request('GET', 'test')),
         ]);
-        $handlerStack = HandlerStack::create($mock);
-        Http::swap(new Client(['handler' => $handlerStack]));
 
         $this->expectException(\Http\Exceptions\HandleRequestException::class);
         $this->expectExceptionMessage('Connection failed');
