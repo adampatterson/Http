@@ -11,6 +11,7 @@ use GuzzleHttp\Psr7\Uri;
 use GuzzleHttp\TransferStats;
 use Http\Actions\HttpRequest;
 use Http\Actions\HttpResponse;
+use Http\Exceptions\HandleRequestException;
 use Http\Http;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\CoversMethod;
@@ -137,7 +138,7 @@ final class HttpResponseTest extends TestCase
     public function throw_throws_exception_on_failure(): void
     {
         $this->mockResponse(400);
-        $this->expectException(\Http\Exceptions\HandleRequestException::class);
+        $this->expectException(HandleRequestException::class);
         $this->expectExceptionMessage('HTTP request returned status code 400');
         Http::get('https://example.com')->throw();
     }
@@ -154,7 +155,7 @@ final class HttpResponseTest extends TestCase
     public function throwIf_throws_exception_on_failure_when_condition_is_true(): void
     {
         $this->mockResponse(400);
-        $this->expectException(\Http\Exceptions\HandleRequestException::class);
+        $this->expectException(HandleRequestException::class);
         Http::get('https://example.com')->throwIf(true);
     }
 
@@ -244,7 +245,7 @@ final class HttpResponseTest extends TestCase
     public function json_decodes_content(): void
     {
         $this->mockResponse(200, [], json_encode(['foo' => 'bar']));
-        $this->assertEquals(['foo' => 'bar'], Http::get('https://example.com')->object());
+        $this->assertEquals(['foo' => 'bar'], Http::get('https://example.com')->array());
     }
 
     #[Test]
@@ -259,15 +260,13 @@ final class HttpResponseTest extends TestCase
     {
         $response = new HttpResponse(new Response(200));
         $response->transferStats = new TransferStats(
-            new Request('GET', 'https://example.com/source'),
+            new Request('GET', 'https://example.com/final'),
             new Response(200),
             0.01,
             null,
-            [],
-            new Uri('https://example.com/final')
         );
 
-        $this->assertEquals('https://example.com/source', (string) $response->effectiveUri());
+        $this->assertEquals('https://example.com/final', (string) $response->effectiveUri());
     }
 
     #[Test]
