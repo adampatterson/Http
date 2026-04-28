@@ -9,3 +9,4 @@ composer.lock
 /.phpunit.cache
 /coverage-report
 /build
+/examples/wip
