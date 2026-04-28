@@ -55,9 +55,11 @@ use Http\Http;
 // GET request
 $response = Http::get('https://example.com/api/users');
 
-$response->status(); // Get status code (int)
-$response->body();   // Get raw body (string)
-$response->json();   // Get JSON decoded body (array)
+$response->status();  // Get status code (int)
+$response->body();    // Get raw body (string)
+$response->array();   // Get JSON decoded body (array)
+$response->object();  // Get JSON decoded body (object)
+$response->collect(); // Get JSON decoded body (Collection)
 $response->header('Content-Type'); // Get specific header
 $response->headers(); // Get all headers
 

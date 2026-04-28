@@ -58,7 +58,7 @@ final class TransformResponseTest extends TestCase
     {
         $subject = $this->makeSubject('{"foo":"bar"}');
 
-        $this->assertSame(['foo' => 'bar'], $subject->object());
+        $this->assertSame(['foo' => 'bar'], $subject->array());
     }
 
     #[Test]

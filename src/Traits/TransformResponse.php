@@ -7,6 +7,8 @@ use Illuminate\Support\Collection;
 trait TransformResponse
 {
 
+    public static int $defaultJsonDecodingFlags = JSON_THROW_ON_ERROR;
+
     /**
      * @return Collection
      */
@@ -25,18 +27,19 @@ trait TransformResponse
 
 
     /**
+     * @param  null  $flags
      * @return mixed
+     *
      * @throws \JsonException
      */
-    public function object(): mixed
+    public function object($flags = null): mixed
     {
         return json_decode(
             $this->response->getBody(),
-            true,
-            flags: JSON_THROW_ON_ERROR
+            false,
+            flags: $flags ?? self::$defaultJsonDecodingFlags
         );
     }
-
 
     /**
      * @return string|false
