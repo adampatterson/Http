@@ -82,10 +82,8 @@
   },
   "holder": {
     "example:multiple": "php examples/multiple.php",
-    "example:cookie_jar": "php examples/cookie_jar.php",
     "example:preload-aliases": "php examples/preload-aliases.php",
     "example:proxy": "php examples/proxy.php",
-    "example:session": "php examples/session.php",
-    "example:timeout": "php examples/timeout.php"
+    "example:session": "php examples/session.php"
   }
 }
