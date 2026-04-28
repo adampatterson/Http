@@ -179,7 +179,7 @@ class HttpRequest
      * @param  string  $password
      * @return $this
      */
-    public function withBasicAuth(string $username, string $password): mixed
+    public function withBasicAuth(string $username, string $password): static
     {
         return tap($this, function ($request) use ($username, $password) {
             return $this->options = array_merge_recursive($this->options, [
@@ -234,7 +234,7 @@ class HttpRequest
      *
      * @return $this
      */
-    public function withHeaders($headers): mixed
+    public function withHeaders($headers): static
     {
         return tap($this, function ($request) use ($headers) {
             return $this->options = array_merge_recursive($this->options, [
@@ -417,13 +417,13 @@ class HttpRequest
                 if ($this->retryWhenCallback && ! ($this->retryWhenCallback)($response->toPsrResponse() ?? $response, $this)) {
                     return $response;
                 }
-            } catch (Throwable $e) {
+            } catch (Throwable $exception) {
                 if ($attempts >= $this->tries) {
-                    throw $e;
+                    throw $exception;
                 }
 
-                if ($this->retryWhenCallback && ! ($this->retryWhenCallback)($e, $this)) {
-                    throw $e;
+                if ($this->retryWhenCallback && ! ($this->retryWhenCallback)($exception, $this)) {
+                    throw $exception;
                 }
             }
 
