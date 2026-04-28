@@ -11,15 +11,9 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\CoversMethod;
 
 
-
 #[CoversClass(Http::class)]
 #[CoversClass(HttpRequest::class)]
 #[CoversMethod(HttpRequest::class, 'retry')]
-#[CoversMethod(HttpRequest::class, 'sleepUntil')]
-#[CoversMethod(HttpRequest::class, 'handleRequestWithRetry')] 
-#[CoversMethod(HttpRequest::class, 'attempts')]
-#[CoversMethod(HttpRequest::class, 'tryCallback')]
-
 final class RetryTest extends TestCase
 {
     #[Test]

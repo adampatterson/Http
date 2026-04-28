@@ -6,6 +6,7 @@ namespace Http\Tests;
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Response;
 use Http\Actions\HttpRequest;
+use Http\Actions\HttpResponse;
 use Http\Http;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\CoversMethod;
@@ -13,13 +14,19 @@ use PHPUnit\Framework\Attributes\Test;
 
 #[CoversClass(Http::class)]
 #[CoversClass(HttpRequest::class)]
-#[CoversMethod(Http::class, 'swap')]
-#[CoversMethod(Http::class, 'useCookieJar')]
-#[CoversMethod(Http::class, 'clearCookieJar')]
-#[CoversMethod(Http::class, 'cookieJar')]
-#[CoversMethod(Http::class, '__callStatic')]
-#[CoversMethod(HttpRequest::class, 'withBasicAuth')]
-#[CoversMethod(HttpRequest::class, 'resolveCookiesOption')]
+#[CoversMethod(HttpRequest::class, 'patch')]
+#[CoversMethod(HttpRequest::class, 'put')]
+#[CoversMethod(HttpRequest::class, 'get')]
+#[CoversMethod(HttpRequest::class, 'post')]
+#[CoversMethod(HttpRequest::class, 'delete')]
+#[CoversMethod(HttpRequest::class, 'status')]
+#[CoversMethod(HttpRequest::class, 'asJson')]
+#[CoversMethod(HttpRequest::class, 'asFormParams')]
+#[CoversMethod(HttpRequest::class, 'asMultipart')]
+#[CoversMethod(HttpResponse::class, 'isSuccess')]
+#[CoversMethod(HttpResponse::class, 'isOk')]
+#[CoversMethod(HttpResponse::class, 'isRedirect')]
+#[CoversMethod(HttpResponse::class, 'isClientError')]
 final class HttpTest extends TestCase
 {
     #[Test]
@@ -36,7 +43,7 @@ final class HttpTest extends TestCase
 
         $sentRequest = $this->container[0]['request'];
         $this->assertEquals('application/json', $sentRequest->getHeaderLine('Content-Type'));
-        $this->assertEquals(json_encode(['key' => 'value']), (string)$sentRequest->getBody());
+        $this->assertEquals(json_encode(['key' => 'value']), (string) $sentRequest->getBody());
     }
 
     #[Test]
@@ -53,7 +60,7 @@ final class HttpTest extends TestCase
 
         $sentRequest = $this->container[0]['request'];
         $this->assertEquals('application/x-www-form-urlencoded', $sentRequest->getHeaderLine('Content-Type'));
-        $this->assertEquals('field=value', (string)$sentRequest->getBody());
+        $this->assertEquals('field=value', (string) $sentRequest->getBody());
     }
 
     #[Test]
@@ -117,6 +124,7 @@ final class HttpTest extends TestCase
 
         $this->assertEquals(200, $response->status());
 
+        // Validates what was sent
         $sentRequest = $this->container[0]['request'];
         $this->assertStringContainsString('multipart/form-data', $sentRequest->getHeaderLine('Content-Type'));
     }
@@ -166,7 +174,8 @@ final class HttpTest extends TestCase
     public function it_throws_handle_request_exception_on_connect_error(): void
     {
         $this->mockResponse([
-            new \GuzzleHttp\Exception\ConnectException('Connection failed', new \GuzzleHttp\Psr7\Request('GET', 'test')),
+            new \GuzzleHttp\Exception\ConnectException('Connection failed',
+                new \GuzzleHttp\Psr7\Request('GET', 'test')),
         ]);
 
         $this->expectException(\Http\Exceptions\HandleRequestException::class);
