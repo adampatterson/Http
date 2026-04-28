@@ -20,7 +20,8 @@
   "require-dev": {
     "phpunit/phpunit": "^13.0",
     "psy/psysh": "^0.12.22",
-    "symfony/var-dumper": "^8.0"
+    "symfony/var-dumper": "^8.0",
+    "spatie/ray": "^1.48"
   },
   "require": {
     "guzzlehttp/guzzle": "^7.4",
@@ -34,16 +35,53 @@
       "src/helpers.php"
     ]
   },
+  "autoload-dev": {
+    "psr-4": {
+      "Http\\Tests\\": "tests/"
+    }
+  },
   "scripts": {
     "test": "phpunit",
+    "test:warnings": "phpunit --display-warnings",
     "test:coverage": "XDEBUG_MODE=coverage phpunit --coverage-text",
-    "example:auth": "php examples/basic-auth.php",
+    "test:coverage:build": "XDEBUG_MODE=coverage phpunit --coverage-html build/coverage",
+    "example:auth:basic": "php examples/auth-basic.php",
+    "example:auth:bearer": "php examples/auth-bearer.php",
     "example:get": "php examples/get.php",
-    "example:post": "php examples/post.php"
+    "example:post": "php examples/post.php",
+    "example:post:headers": "php examples/post-headers.php",
+    "example:post:json": "php examples/post-json.php",
+    "example:post:form": "php examples/post-form.php",
+    "example:put": "php examples/put.php",
+    "example:patch": "php examples/patch.php",
+    "example:delete": "php examples/delete.php",
+    "example:cookie": "php examples/cookie.php",
+    "example:cookie:jar": "php examples/cookie-jar.php",
+    "example:timeout": "php examples/timeout.php",
+    "example:timeout:fail": "php examples/timeout.php fail",
+    "example:retry": "php examples/retry.php",
+    "example:retry:fail": "php examples/retry.php fail",
+    "examples": [
+      "@example:auth:basic",
+      "@example:auth:bearer",
+      "@example:get",
+      "@example:post",
+      "@example:post:headers",
+      "@example:post:json",
+      "@example:post:form",
+      "@example:put",
+      "@example:patch",
+      "@example:delete",
+      "@example:cookie",
+      "@example:cookie:jar",
+      "@example:timeout",
+      "@example:timeout:fail",
+      "@example:retry",
+      "@example:retry:fail"
+    ]
   },
   "holder": {
     "example:multiple": "php examples/multiple.php",
-    "example:cookie": "php examples/cookie.php",
     "example:cookie_jar": "php examples/cookie_jar.php",
     "example:preload-aliases": "php examples/preload-aliases.php",
     "example:proxy": "php examples/proxy.php",

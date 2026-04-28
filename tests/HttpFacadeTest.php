@@ -4,11 +4,16 @@ namespace Http\Tests;
 
 use GuzzleHttp\Client;
 use Http\Http;
+use ReflectionClass;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\CoversMethod;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use ReflectionClass;
 
-class HttpFacadeTest extends TestCase
+#[CoversClass(Http::class)]
+#[CoversMethod(Http::class, 'swap')]
+#[CoversMethod(Http::class, '__callStatic')]
+final class HttpFacadeTest extends TestCase
 {
     protected function tearDown(): void
     {
@@ -28,7 +33,7 @@ class HttpFacadeTest extends TestCase
         $reflection = new ReflectionClass(Http::class);
         $property = $reflection->getProperty('client');
         $property->setAccessible(true);
-        
+
         $this->assertSame($client, $property->getValue());
     }
 

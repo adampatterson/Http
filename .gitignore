@@ -8,3 +8,5 @@ composer.lock
 /.phpunit.result.cache
 /.phpunit.cache
 /coverage-report
+/build
+/examples/wip

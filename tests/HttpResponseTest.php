@@ -1,15 +1,58 @@
 <?php
+
+namespace Http\Tests;
+
 use GuzzleHttp\Client;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
-use GuzzleHttp\Middleware;
+use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
+use GuzzleHttp\Psr7\Uri;
+use GuzzleHttp\TransferStats;
+use Http\Actions\HttpRequest;
+use Http\Actions\HttpResponse;
+use Http\Exceptions\HandleRequestException;
 use Http\Http;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\CoversMethod;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
-class HttpResponseTest extends TestCase
+#[CoversClass(Http::class)]
+#[CoversClass(HttpResponse::class)]
+#[CoversMethod(Http::class, 'swap')]
+#[CoversMethod(HttpRequest::class, 'get')]
+#[CoversMethod(HttpRequest::class, 'post')]
+#[CoversMethod(HttpRequest::class, 'put')]
+#[CoversMethod(HttpRequest::class, 'patch')]
+#[CoversMethod(HttpRequest::class, 'delete')]
+#[CoversMethod(HttpResponse::class, 'body')]
+#[CoversMethod(HttpResponse::class, 'headers')]
+#[CoversMethod(HttpResponse::class, 'header')]
+#[CoversMethod(HttpResponse::class, 'status')]
+#[CoversMethod(HttpResponse::class, 'cookies')]
+#[CoversMethod(HttpResponse::class, 'effectiveUri')]
+#[CoversMethod(HttpResponse::class, 'isSuccess')]
+#[CoversMethod(HttpResponse::class, 'isOk')]
+#[CoversMethod(HttpResponse::class, 'isRedirect')]
+#[CoversMethod(HttpResponse::class, 'isClientError')]
+#[CoversMethod(HttpResponse::class, 'isServerError')]
+#[CoversMethod(HttpResponse::class, 'successful')]
+#[CoversMethod(HttpResponse::class, 'failed')]
+#[CoversMethod(HttpResponse::class, 'clientError')]
+#[CoversMethod(HttpResponse::class, 'serverError')]
+#[CoversMethod(HttpResponse::class, 'onError')]
+#[CoversMethod(HttpResponse::class, 'throw')]
+#[CoversMethod(HttpResponse::class, 'throwIf')]
+#[CoversMethod(HttpResponse::class, '__toString')]
+#[CoversMethod(HttpResponse::class, '__call')]
+final class HttpResponseTest extends TestCase
 {
+    protected function setUp(): void
+    {
+        Http::clearCookieJar();
+    }
+
     private function mockResponse(int $status, array $headers = [], string $body = ''): void
     {
         $mock = new MockHandler([
@@ -28,6 +71,100 @@ class HttpResponseTest extends TestCase
 
         $this->mockResponse(404);
         $this->assertEquals(404, Http::get('https://example.com')->status());
+    }
+
+    #[Test]
+    public function successful_returns_true_for_200_range(): void
+    {
+        $this->mockResponse(200);
+        $this->assertTrue(Http::get('https://example.com')->successful());
+
+        $this->mockResponse(400);
+        $this->assertFalse(Http::get('https://example.com')->successful());
+    }
+
+    #[Test]
+    public function failed_returns_true_for_400_plus(): void
+    {
+        $this->mockResponse(400);
+        $this->assertTrue(Http::get('https://example.com')->failed());
+
+        $this->mockResponse(500);
+        $this->assertTrue(Http::get('https://example.com')->failed());
+
+        $this->mockResponse(200);
+        $this->assertFalse(Http::get('https://example.com')->failed());
+    }
+
+    #[Test]
+    public function clientError_returns_true_for_400_range(): void
+    {
+        $this->mockResponse(404);
+        $this->assertTrue(Http::get('https://example.com')->clientError());
+
+        $this->mockResponse(500);
+        $this->assertFalse(Http::get('https://example.com')->clientError());
+    }
+
+    #[Test]
+    public function serverError_returns_true_for_500_plus(): void
+    {
+        $this->mockResponse(500);
+        $this->assertTrue(Http::get('https://example.com')->serverError());
+
+        $this->mockResponse(404);
+        $this->assertFalse(Http::get('https://example.com')->serverError());
+    }
+
+    #[Test]
+    public function onError_executes_callback_on_failure(): void
+    {
+        $this->mockResponse(400);
+        $called = false;
+        Http::get('https://example.com')->onError(function () use (&$called) {
+            $called = true;
+        });
+        $this->assertTrue($called);
+
+        $this->mockResponse(200);
+        $called = false;
+        Http::get('https://example.com')->onError(function () use (&$called) {
+            $called = true;
+        });
+        $this->assertFalse($called);
+    }
+
+    #[Test]
+    public function throw_throws_exception_on_failure(): void
+    {
+        $this->mockResponse(400);
+        $this->expectException(HandleRequestException::class);
+        $this->expectExceptionMessage('HTTP request returned status code 400');
+        Http::get('https://example.com')->throw();
+    }
+
+    #[Test]
+    public function throw_does_not_throw_on_success(): void
+    {
+        $this->mockResponse(200);
+        $response = Http::get('https://example.com')->throw();
+        $this->assertInstanceOf(HttpResponse::class, $response);
+    }
+
+    #[Test]
+    public function throwIf_throws_exception_on_failure_when_condition_is_true(): void
+    {
+        $this->mockResponse(400);
+        $this->expectException(HandleRequestException::class);
+        Http::get('https://example.com')->throwIf(true);
+    }
+
+    #[Test]
+    public function throwIf_does_not_throw_on_failure_when_condition_is_false(): void
+    {
+        $this->mockResponse(400);
+        $response = Http::get('https://example.com')->throwIf(false);
+        $this->assertInstanceOf(HttpResponse::class, $response);
     }
 
     #[Test]
@@ -108,7 +245,7 @@ class HttpResponseTest extends TestCase
     public function json_decodes_content(): void
     {
         $this->mockResponse(200, [], json_encode(['foo' => 'bar']));
-        $this->assertEquals(['foo' => 'bar'], Http::get('https://example.com')->json());
+        $this->assertEquals(['foo' => 'bar'], Http::get('https://example.com')->array());
     }
 
     #[Test]
@@ -121,17 +258,31 @@ class HttpResponseTest extends TestCase
     #[Test]
     public function it_can_return_effective_uri(): void
     {
-        $container = [];
-        $mock = new MockHandler([new Response(200)]);
-        $handlerStack = HandlerStack::create($mock);
-        $handlerStack->push(Middleware::history($container));
-        
-        $client = new Client(['handler' => $handlerStack]);
-        Http::swap($client);
+        $response = new HttpResponse(new Response(200));
+        $response->transferStats = new TransferStats(
+            new Request('GET', 'https://example.com/final'),
+            new Response(200),
+            0.01,
+            null,
+        );
 
-        $response = Http::get('https://example.com');
-        
-        $this->assertEquals('https://example.com', (string) $response->effectiveUri());
+        $this->assertEquals('https://example.com/final', (string) $response->effectiveUri());
+    }
+
+    #[Test]
+    public function to_string_returns_body_content(): void
+    {
+        $response = new HttpResponse(new Response(200, [], 'hello world'));
+
+        $this->assertSame('hello world', (string) $response);
+    }
+
+    #[Test]
+    public function call_proxies_methods_to_the_underlying_response(): void
+    {
+        $response = new HttpResponse(new Response(200, [], null, '1.1'));
+
+        $this->assertSame('1.1', $response->getProtocolVersion());
     }
 
     #[Test]
