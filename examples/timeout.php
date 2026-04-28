@@ -1,14 +1,14 @@
 <?php
 
+global $passOrFail;
+
 use Http\Http;
 use Http\Exceptions\HandleRequestException;
 
 include "setup.php";
 
-$passOrFail = $argv[1] ?? 'pass';
-
 // Now let's make a request to a page that will delay its response by 2 seconds
-if ($passOrFail === 'pass') {
+if ($passOrFail) {
     // We set a timeout of 1 second, so this request will pass.
     $response = Http::timeout(2)->get('https://httpbin.org/delay/1');
 

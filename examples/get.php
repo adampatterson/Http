@@ -11,7 +11,4 @@ $request = Http::get(
 );
 
 // Check what we received
-dump([
-    "status" => $request->status(),
-    "collection" => $request->array(),
-]);
+render_example('Get Request', $request);

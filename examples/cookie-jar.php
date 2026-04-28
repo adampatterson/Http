@@ -14,8 +14,4 @@ $cookieJar = CookieJar::fromArray([
 $request = Http::withCookieJar($cookieJar)
     ->get('http://httpbin.org/cookies');
 
-// Check what we received
-dump([
-    'status'     => $request->status(),
-    'collection' => $request->array(),
-]);
+render_example('Cookie Jar', $request);

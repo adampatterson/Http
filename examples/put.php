@@ -10,8 +10,4 @@ $request = Http::put(
     ['mydata' => 'something']
 );
 
-// Check what we received
-dump([
-    "status" => $request->status(),
-    "collection" => $request->array(),
-]);
+render_example('Put Request', $request);

@@ -1,15 +1,15 @@
 <?php
+global $passOrFail;
 
 use Http\Http;
 use Http\Exceptions\HandleRequestException;
 
 include "setup.php";
 
-$passOrFail = $argv[1] ?? 'pass';
 $retriesTriggered = 0;
 
 // Configure retries with a short delay between attempts (in milliseconds).
-if ($passOrFail === 'pass') {
+if ($passOrFail) {
     // This request succeeds, even with retry behavior enabled.
     $response = Http::retry(3, 250)
         ->timeout(2)

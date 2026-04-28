@@ -10,8 +10,4 @@ $response = Http::delete(
     params: ['some' => 'value']
 );
 
-// Check what we received
-dump([
-    "status"     => $response->status(),
-    "collection" => $response->array(),
-]);
+render_example('Delete Request', $response);
