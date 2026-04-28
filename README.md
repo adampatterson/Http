@@ -19,6 +19,7 @@ composer require adampatterson/http
 
 ```php
 use Http\Http;
+use GuzzleHttp\Cookie\CookieJar;
 
 // GET request
 $response = Http::get('https://example.com/api/users');
@@ -34,6 +35,14 @@ $response = Http::withHeaders(['X-Custom' => 'value'])->get('https://example.com
 
 // Request with Bearer token
 $response = Http::withToken('your-token')->get('https://example.com/api/users');
+
+// Request with simple cookie array (domain required for direct array conversion)
+$response = Http::withCookies(['session_id' => 'abc123'], 'example.com')
+    ->get('https://example.com/api/users');
+
+// Request with a reusable Guzzle cookie jar
+$jar = CookieJar::fromArray(['session_id' => 'abc123'], 'example.com');
+$response = Http::withCookieJar($jar)->get('https://example.com/api/users');
 ```
 
 ### Response Helpers
@@ -68,6 +77,18 @@ If you need to access a method on the underlying Guzzle response that is not exp
 // so it is proxied to GuzzleHttp\Psr7\Response
 $version = $response->getProtocolVersion(); 
 ```
+
+### Request/Response Flow
+
+At a high level, the package separates request building from response consumption:
+
+1. The `Http` facade forwards static calls to `MakeHttpRequest`.
+2. `MakeHttpRequest` collects fluent configuration (`asJson`, `withHeaders`, `withToken`, `withCookies`, etc.) and verb payload options.
+3. `send()` merges options, parses query params from the URL, executes the Guzzle request, and captures transfer stats.
+4. The raw PSR-7 response is wrapped in `HttpResponse`.
+5. `HttpResponse` exposes helper methods (`body`, `json`, `status`, etc.) and proxies unknown methods to Guzzle.
+
+This flow keeps transport concerns in `MakeHttpRequest` and read helpers in `HttpResponse`.
 
 ## Tests
 
