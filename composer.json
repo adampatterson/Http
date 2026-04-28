@@ -60,7 +60,25 @@
     "example:timeout": "php examples/timeout.php",
     "example:timeout:fail": "php examples/timeout.php fail",
     "example:retry": "php examples/retry.php",
-    "example:retry:fail": "php examples/retry.php fail"
+    "example:retry:fail": "php examples/retry.php fail",
+    "examples": [
+      "@example:auth:basic",
+      "@example:auth:bearer",
+      "@example:get",
+      "@example:post",
+      "@example:post:headers",
+      "@example:post:json",
+      "@example:post:form",
+      "@example:put",
+      "@example:patch",
+      "@example:delete",
+      "@example:cookie",
+      "@example:cookie:jar",
+      "@example:timeout",
+      "@example:timeout:fail",
+      "@example:retry",
+      "@example:retry:fail"
+    ]
   },
   "holder": {
     "example:multiple": "php examples/multiple.php",
