@@ -10,3 +10,4 @@ composer.lock
 /coverage-report
 /build
 /examples/wip
+/AGENTS.md
