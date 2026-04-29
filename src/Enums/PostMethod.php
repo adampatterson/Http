@@ -1,4 +1,5 @@
 <?php
+
 namespace Http\Enums;
 
 enum PostMethod: string

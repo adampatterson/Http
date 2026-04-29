@@ -1,6 +1,5 @@
 <?php
 
-use Http\Response;
 
 file_exists($composer = __DIR__.'/../vendor/autoload.php')
 or die("Run <code>composer install</code> from ".__DIR__);

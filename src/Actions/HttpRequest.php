@@ -27,7 +27,6 @@ use Throwable;
  */
 class HttpRequest
 {
-
     /**
      * @var string
      */
@@ -378,14 +377,18 @@ class HttpRequest
 
         return $this->retryRequest(function () use ($method, $url, $requestOptions) {
             try {
-                return tap(new HttpResponse($this->client()
-                    ->request($method->value,
+                return tap(
+                    new HttpResponse($this->client()
+                    ->request(
+                        $method->value,
                         $url,
-                        $requestOptions)),
+                        $requestOptions
+                    )),
                     function ($response) {
                         $response->cookies = $this->cookies;
                         $response->transferStats = $this->transferStats;
-                    });
+                    }
+                );
             } catch (ConnectException $exception) {
                 throw new HandleRequestException($exception->getMessage(), 0, $exception);
             }
@@ -497,4 +500,3 @@ class HttpRequest
         return $this->client;
     }
 }
-

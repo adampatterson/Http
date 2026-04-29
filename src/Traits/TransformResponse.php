@@ -6,7 +6,6 @@ use Illuminate\Support\Collection;
 
 trait TransformResponse
 {
-
     public static int $defaultJsonDecodingFlags = JSON_THROW_ON_ERROR;
 
     /**

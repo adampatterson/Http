@@ -2,7 +2,6 @@
 
 namespace Http\Tests;
 
-
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Response;
 use Http\Actions\HttpRequest;
@@ -174,8 +173,10 @@ final class HttpTest extends TestCase
     public function it_throws_handle_request_exception_on_connect_error(): void
     {
         $this->mockResponse([
-            new \GuzzleHttp\Exception\ConnectException('Connection failed',
-                new \GuzzleHttp\Psr7\Request('GET', 'test')),
+            new \GuzzleHttp\Exception\ConnectException(
+                'Connection failed',
+                new \GuzzleHttp\Psr7\Request('GET', 'test')
+            ),
         ]);
 
         $this->expectException(\Http\Exceptions\HandleRequestException::class);

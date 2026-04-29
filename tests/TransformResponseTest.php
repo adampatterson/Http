@@ -22,7 +22,7 @@ final class TransformResponseTest extends TestCase
 {
     private function makeSubject(string $body): object
     {
-        return new class(new Response(200, [], $body)) {
+        return new class (new Response(200, [], $body)) {
             use TransformResponse;
 
             private Response $response;
@@ -79,4 +79,3 @@ final class TransformResponseTest extends TestCase
         $subject->object();
     }
 }
-

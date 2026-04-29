@@ -2,7 +2,6 @@
 
 namespace Http\Tests;
 
-
 use GuzzleHttp\Client;
 use GuzzleHttp\Cookie\CookieJar;
 use GuzzleHttp\Cookie\CookieJarInterface;

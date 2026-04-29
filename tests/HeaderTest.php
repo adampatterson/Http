@@ -2,7 +2,6 @@
 
 namespace Http\Tests;
 
-
 use GuzzleHttp\Psr7\Response;
 use Http\Actions\HttpRequest;
 use Http\Http;

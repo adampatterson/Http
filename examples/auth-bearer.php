@@ -10,4 +10,3 @@ $request = Http::withToken($token)->get(url: 'https://httpbin.org/bearer');
 
 // Check what we received
 render_example('Auth Bearer', $request);
-

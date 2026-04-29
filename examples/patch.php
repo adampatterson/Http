@@ -11,4 +11,3 @@ $request = Http::patch(
 );
 
 render_example('Patch Request', $request);
-

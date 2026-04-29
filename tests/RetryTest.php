@@ -2,14 +2,12 @@
 
 namespace Http\Tests;
 
-
 use GuzzleHttp\Psr7\Response;
 use Http\Http;
 use PHPUnit\Framework\Attributes\Test;
 use Http\Actions\HttpRequest;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\CoversMethod;
-
 
 #[CoversClass(Http::class)]
 #[CoversClass(HttpRequest::class)]
@@ -54,8 +52,10 @@ final class RetryTest extends TestCase
     public function it_retries_on_connection_exceptions(): void
     {
         $this->mockResponse([
-            new \GuzzleHttp\Exception\ConnectException('Connection error',
-                new \GuzzleHttp\Psr7\Request('GET', 'https://example.com')),
+            new \GuzzleHttp\Exception\ConnectException(
+                'Connection error',
+                new \GuzzleHttp\Psr7\Request('GET', 'https://example.com')
+            ),
             new Response(200, [], 'Success'),
         ]);
 
@@ -70,10 +70,14 @@ final class RetryTest extends TestCase
     public function it_throws_exception_when_all_retries_fail_with_exception(): void
     {
         $this->mockResponse([
-            new \GuzzleHttp\Exception\ConnectException('Connection error',
-                new \GuzzleHttp\Psr7\Request('GET', 'https://example.com')),
-            new \GuzzleHttp\Exception\ConnectException('Connection error',
-                new \GuzzleHttp\Psr7\Request('GET', 'https://example.com')),
+            new \GuzzleHttp\Exception\ConnectException(
+                'Connection error',
+                new \GuzzleHttp\Psr7\Request('GET', 'https://example.com')
+            ),
+            new \GuzzleHttp\Exception\ConnectException(
+                'Connection error',
+                new \GuzzleHttp\Psr7\Request('GET', 'https://example.com')
+            ),
         ]);
 
         $this->expectException(\Http\Exceptions\HandleRequestException::class);

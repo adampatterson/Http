@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Http\Tests;
 
-
 use PHPUnit\Framework\Attributes\CoversFunction;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -32,4 +31,3 @@ final class HelpersTest extends TestCase
         $this->assertTrue(function_exists('tap'));
     }
 }
-
